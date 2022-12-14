@@ -1,20 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from "react";
+import StackNavigator from "./StackNavigator";
+import { LogBox } from "react-native";
+LogBox.ignoreAllLogs(); //Ignore log notification by message
+import { NavigationContainer } from "@react-navigation/native";
+import { AuthProvider } from "./hooks/useAuth";
+import { EventRegister } from "react-native-event-listeners";
+import themeContext from "./config/themeContext";
+import theme from "./config/Theme";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const [mode, setMode] = useState(false);
+	useEffect(() => {
+		let eventListener = EventRegister.addEventListener(
+			"changeTheme",
+			(data) => {
+				setMode(data);
+				console.log(data);
+			}
+		);
+		return () => {
+			EventRegister.removeEventListener(eventListener);
+		};
+	});
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	return (
+		<themeContext.Provider value={mode === true ? theme.dark : theme.light}>
+			<NavigationContainer>
+				<AuthProvider>
+					<StackNavigator />
+				</AuthProvider>
+			</NavigationContainer>
+		</themeContext.Provider>
+	);
+}
