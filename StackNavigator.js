@@ -4,8 +4,9 @@ import React from "react";
 
 //Screens
 import HomeScreen from "./screens/HomeScreen";
-import RequestScreen from "./screens/RequestScreen";
 import Menu from "./screens/Menu";
+import RequestScreen from "./screens/RequestScreen";
+import ScheduleService from "./screens/ScheduleService";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,8 +19,9 @@ const StackNavigator = () => {
 			}}
 		>
 			<Stack.Screen name="Home" component={HomeScreen} />
-			<Stack.Screen name="Request" component={RequestScreen} />
 			<Stack.Screen name="Menu" component={Menu} />
+			<Stack.Screen name="Schedule" component={ScheduleService} />
+			<Stack.Screen name="Request" component={RequestScreen} />
 		</Stack.Navigator>
 	);
 };
