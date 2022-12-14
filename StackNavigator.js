@@ -22,6 +22,7 @@ const StackNavigator = () => {
 			<Stack.Screen name="Menu" component={Menu} />
 			<Stack.Screen name="Schedule" component={ScheduleService} />
 			<Stack.Screen name="Request" component={RequestScreen} />
+			<Stack.Screen name="Thanks" component={ThankyouScreen} />
 		</Stack.Navigator>
 	);
 };
