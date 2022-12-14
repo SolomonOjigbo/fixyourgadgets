@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "223320124700",
+    "firebase_url": "https://slack-clone-1cc39-default-rtdb.firebaseio.com",
+    "project_id": "slack-clone-1cc39",
+    "storage_bucket": "slack-clone-1cc39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223320124700:android:3ab3207ae5978f26e0ded9",
+        "android_client_info": {
+          "package_name": "com.tech.fixyourgadgets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223320124700-vvq0koig24una3c8ni2jq31e6tclu516.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqcN61QHSpKmcrvQgYYa_HPSPKvRk6YXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223320124700-vvq0koig24una3c8ni2jq31e6tclu516.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
