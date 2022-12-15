@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-// import useAuth from "./hooks/useAuth";
+import useAuth from "./hooks/useAuth";
 
 //Screens
 import HomeScreen from "./screens/HomeScreen";
@@ -11,18 +11,24 @@ import ScheduleService from "./screens/ScheduleService";
 const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
-	// const { user } = useAuth();
+	const { user } = useAuth();
 	return (
 		<Stack.Navigator
 			screenOptions={{
 				headerShown: false,
 			}}
 		>
-			<Stack.Screen name="Home" component={HomeScreen} />
-			<Stack.Screen name="Menu" component={Menu} />
-			<Stack.Screen name="Schedule" component={ScheduleService} />
-			<Stack.Screen name="Request" component={RequestScreen} />
-			<Stack.Screen name="Thanks" component={ThankyouScreen} />
+			{user ? (
+				<>
+					<Stack.Screen name="Home" component={HomeScreen} />
+					<Stack.Screen name="Menu" component={Menu} />
+					<Stack.Screen name="Schedule" component={ScheduleService} />
+					<Stack.Screen name="Request" component={RequestScreen} />
+					<Stack.Screen name="Thanks" component={ThankyouScreen} />
+				</>
+			) : (
+				<Stack.Screen name="Login" component={LoginScreen} />
+			)}
 		</Stack.Navigator>
 	);
 };
