@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+	useEffect,
+	useMemo,
+	useState,
+	useContext,
+	createContext,
+} from "react";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import {
@@ -7,20 +13,21 @@ import {
 	signInWithCredential,
 	signOut,
 } from "@firebase/auth";
+import { ANDROID_CLIENTID, IOS_CLIENTID, EXPO_CLIENTID } from "@env";
 
 const AuthContext = createContext({});
 
 WebBrowser.maybeCompleteAuthSession();
 
 const config = {
-	androidClientId: process.env.REACT_APP_ANDROID_CLIENTID,
-	iosClientId: process.env.REACT_APP_IOS_CLIENTID,
-	expoClientId: process.env.REACT_APP_EXPO_CLIENTID,
+	androidClientId: ANDROID_CLIENTID,
+	iosClientId: IOS_CLIENTID,
+	expoClientId: EXPO_CLIENTID,
 	scopes: ["profile", "email"],
 	permissions: ["public_profile", "email", "gender"],
 };
 
-export const AuthProvider = ({ children }) => {
+export default function AuthProvider({ children }) {
 	const [message, setMessage] = useState(null);
 	const [user, setUser] = useState(null);
 	const [auth, setAuth] = useState();
@@ -28,49 +35,46 @@ export const AuthProvider = ({ children }) => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const [request, response, promptAsync] = Google.useAuthRequest({
-		androidClientId: REACT_APP_ANDROID_CLIENTID,
-		iosClientId: REACT_APP_IOS_CLIENTID,
-		expoClientId: REACT_APP_EXPO_CLIENTID,
-	});
+	const [request, response, promptAsync] = Google.useIdTokenAuthRequest(config);
 
 	useEffect(() => {
+		async function getUserData() {
+			let userInfoResponse = await fetch(
+				"https://www.googleapis.com/userinfo/v2/me",
+				{
+					headers: {
+						Authorization: `Bearer ${auth.accessToken}`,
+					},
+				}
+			);
+
+			userInfoResponse.json().then((data) => {
+				setUser(data);
+			});
+		}
 		setMessage(JSON.stringify(response));
 		if (response?.type === "success") {
 			setAuth(response.authentication);
+			auth && getUserData();
 		}
-		getUserData();
-	}, [response]);
+	}, [response, auth]);
 
-	async function getUserData() {
-		let userInfoResponse = await fetch(
-			"https://www.googleapis.com/userinfo/v2/me",
-			{
-				headers: { Authorization: `Bearer ${auth.accessToken}` },
-			}
-		);
+	// useEffect(
+	// 	() =>
+	// 		onAuthStateChanged(auth, (user) => {
+	// 			if (user) {
+	// 				//Logged in....
+	// 				setUser(user);
+	// 			} else {
+	// 				//Not logged in....
+	// 				setUser(null);
+	// 			}
 
-		userInfoResponse.json().then((data) => {
-			setUser(data);
-		});
-	}
+	// 			setLoadingInitial(false);
+	// 		}),
 
-	useEffect(
-		() =>
-			onAuthStateChanged(auth, (user) => {
-				if (user) {
-					//Logged in....
-					setUser(user);
-				} else {
-					//Not logged in....
-					setUser(null);
-				}
-
-				setLoadingInitial(false);
-			}),
-
-		[]
-	);
+	// 	[]
+	// );
 
 	const logout = () => {
 		setLoading(true);
@@ -82,12 +86,12 @@ export const AuthProvider = ({ children }) => {
 
 	const signInWithGoogle = async () => {
 		setLoading(true);
-
-		await Google.useAuthRequest(config)
+		promptAsync()
 			.then(async (response) => {
 				if (response.type === "success") {
+					setAuth(response.authentication);
 					//login....
-					const { idToken, accessToken } = response;
+					const { idToken, accessToken } = response.params.id_token;
 					const credential = GoogleAuthProvider.credential(
 						idToken,
 						accessToken
@@ -95,6 +99,7 @@ export const AuthProvider = ({ children }) => {
 
 					await signInWithCredential(auth, credential);
 				}
+
 				return Promise.reject();
 			})
 			.catch((error) => setError(error))
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }) => {
 			user,
 			loading,
 			error,
+			getUserData,
 			signInWithGoogle,
 			logout,
 		}),
@@ -113,12 +119,10 @@ export const AuthProvider = ({ children }) => {
 	);
 
 	return (
-		<AuthContext.Provider value={memoedValue}>
-			{!loadingInitial && children}
-		</AuthContext.Provider>
+		<AuthContext.Provider value={memoedValue}>{children}</AuthContext.Provider>
 	);
-};
+}
 
 export const useAuth = () => {
-	useContext(AuthContext);
+	return useContext(AuthContext);
 };

@@ -1,12 +1,14 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import useAuth from "./hooks/useAuth";
+import { useAuth } from "./hooks/useAuth";
 
 //Screens
 import HomeScreen from "./screens/HomeScreen";
 import Menu from "./screens/Menu";
 import RequestScreen from "./screens/RequestScreen";
 import ScheduleService from "./screens/ScheduleService";
+import LoginScreen from "./screens/LoginScreen";
+import ThankyouScreen from "./screens/ThankyouScreen";
 
 const Stack = createNativeStackNavigator();
 
