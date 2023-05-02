@@ -3,7 +3,7 @@ import StackNavigator from "./StackNavigator";
 import { LogBox } from "react-native";
 LogBox.ignoreAllLogs(); //Ignore log notification by message
 import { NavigationContainer } from "@react-navigation/native";
-import { AuthProvider } from "./hooks/useAuth";
+import AuthProvider from "./hooks/useAuth";
 import { EventRegister } from "react-native-event-listeners";
 import themeContext from "./config/themeContext";
 import theme from "./config/Theme";

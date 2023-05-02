@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import {
-	GoogleAuthProvider,
-	onAuthStateChanged,
-	signInWithCredential,
-	signOut,
-} from "@firebase/auth";
+
 import { ANDROID_CLIENTID, IOS_CLIENTID, EXPO_CLIENTID } from "@env";
 
 const AuthContext = createContext({});
@@ -28,94 +23,116 @@ const config = {
 };
 
 export default function AuthProvider({ children }) {
-	const [message, setMessage] = useState(null);
 	const [user, setUser] = useState(null);
 	const [auth, setAuth] = useState();
-	const [loadingInitial, setLoadingInitial] = useState(true);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [requireRefresh, setRequireRefresh] = useState(false);
 
-	const [request, response, promptAsync] = Google.useIdTokenAuthRequest(config);
+	const [request, response, promptAsync] = Google.useAuthRequest(config);
 
 	useEffect(() => {
-		async function getUserData() {
-			let userInfoResponse = await fetch(
-				"https://www.googleapis.com/userinfo/v2/me",
-				{
-					headers: {
-						Authorization: `Bearer ${auth.accessToken}`,
-					},
-				}
-			);
-
-			userInfoResponse.json().then((data) => {
-				setUser(data);
-			});
-		}
-		setMessage(JSON.stringify(response));
+		console.log(response);
 		if (response?.type === "success") {
 			setAuth(response.authentication);
-			auth && getUserData();
+
+			const persistAuth = async () => {
+				await AsyncStorage.setItem(
+					"auth",
+					JSON.stringify(response.authentication)
+				);
+			};
+			persistAuth();
 		}
-	}, [response, auth]);
+	}, [response]);
 
-	// useEffect(
-	// 	() =>
-	// 		onAuthStateChanged(auth, (user) => {
-	// 			if (user) {
-	// 				//Logged in....
-	// 				setUser(user);
-	// 			} else {
-	// 				//Not logged in....
-	// 				setUser(null);
-	// 			}
+	useEffect(() => {
+		const getPersistedAuth = async () => {
+			const jsonValue = await AsyncStorage.getItem("auth");
+			if (jsonValue != null) {
+				const authFromJson = JSON.parse(jsonValue);
+				setAuth(authFromJson);
+				console.log(authFromJson);
 
-	// 			setLoadingInitial(false);
-	// 		}),
+				setRequireRefresh(
+					!AuthSession.TokenResponse.isTokenFresh({
+						expiresIn: authFromJson.expiresIn,
+						issuedAt: authFromJson.issuedAt,
+					})
+				);
+			}
+		};
+		getPersistedAuth();
+	}, []);
 
-	// 	[]
-	// );
+	const getUserData = async () => {
+		let userInfoResponse = await fetch(
+			"https://www.googleapis.com/userinfo/v2/me",
+			{
+				headers: { Authorization: `Bearer ${auth.accessToken}` },
+			}
+		);
 
-	const logout = () => {
-		setLoading(true);
-
-		signOut(auth)
-			.catch((error) => setError(error))
-			.finally(() => setLoading(false));
+		userInfoResponse.json().then((data) => {
+			console.log(data);
+			setUser(data);
+		});
 	};
 
-	const signInWithGoogle = async () => {
-		setLoading(true);
-		promptAsync()
-			.then(async (response) => {
-				if (response.type === "success") {
-					setAuth(response.authentication);
-					//login....
-					const { idToken, accessToken } = response.params.id_token;
-					const credential = GoogleAuthProvider.credential(
-						idToken,
-						accessToken
-					);
+	const getClientId = () => {
+		if (Platform.OS === "ios") {
+			return IOS_CLIENTID;
+		} else if (Platform.OS === "android") {
+			return ANDROID_CLIENTID;
+		} else {
+			console.log("Invalid platform - not handled");
+		}
+	};
 
-					await signInWithCredential(auth, credential);
-				}
+	const refreshToken = async () => {
+		const clientId = getClientId();
+		console.log(auth);
+		const tokenResult = await AuthSession.refreshAsync(
+			{
+				clientId: clientId,
+				refreshToken: auth.refreshToken,
+			},
+			{
+				tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
+			}
+		);
 
-				return Promise.reject();
-			})
-			.catch((error) => setError(error))
-			.finally(() => setLoading(false));
+		tokenResult.refreshToken = auth.refreshToken;
+
+		setAuth(tokenResult);
+		await AsyncStorage.setItem("auth", JSON.stringify(tokenResult));
+		setRequireRefresh(false);
+	};
+
+	const logout = async () => {
+		await AuthSession.revokeAsync(
+			{
+				token: auth.accessToken,
+			},
+			{
+				revocationEndpoint: "https://oauth2.googleapis.com/revoke",
+			}
+		);
+
+		setAuth(undefined);
+		setUser(undefined);
+		await AsyncStorage.removeItem("auth");
 	};
 
 	const memoedValue = useMemo(
 		() => ({
 			user,
-			loading,
-			error,
+			auth,
+			requireRefresh,
+			refreshToken,
 			getUserData,
-			signInWithGoogle,
 			logout,
+			promptAsync,
 		}),
-		[user, loading, error]
+		[user, auth]
 	);
 
 	return (

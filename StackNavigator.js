@@ -19,6 +19,7 @@ const StackNavigator = () => {
 			screenOptions={{
 				headerShown: false,
 			}}
+			initialRouteName="Home"
 		>
 			{user ? (
 				<>

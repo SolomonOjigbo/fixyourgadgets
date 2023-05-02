@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import tw from "tailwind-rn";
 
 const LoginScreen = () => {
-	const { signInWithGoogle, loading } = useAuth();
+	const { getUserData } = useAuth();
 	const navigation = useNavigation();
 
 	useLayoutEffect(() => {
@@ -27,7 +27,7 @@ const LoginScreen = () => {
 						tw("absolute bottom-40 w-52 p-4 bg-black rounded-2xl"),
 						{ marginHorizontal: "25%" },
 					]}
-					onPress={signInWithGoogle}
+					onPress={getUserData()}
 				>
 					<Text style={tw("text-center font-bold text-white")}>
 						Get Started
