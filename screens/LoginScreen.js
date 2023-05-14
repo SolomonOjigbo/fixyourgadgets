@@ -1,12 +1,12 @@
 import { useNavigation } from "@react-navigation/core";
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { View, ImageBackground, TouchableOpacity } from "react-native";
 import { Text, Button, TextInput } from "react-native-paper";
 import { useAuth } from "../hooks/useAuth";
 import tw from "tailwind-rn";
 
 const LoginScreen = () => {
-	const { getUserData } = useAuth();
+	const { auth, getUserData, promptAsync } = useAuth();
 	const navigation = useNavigation();
 
 	useLayoutEffect(() => {
@@ -27,7 +27,7 @@ const LoginScreen = () => {
 						tw("absolute bottom-40 w-52 p-4 bg-black rounded-2xl"),
 						{ marginHorizontal: "25%" },
 					]}
-					onPress={getUserData()}
+					onPress={auth ? getUserData() : () => promptAsync()}
 				>
 					<Text style={tw("text-center font-bold text-white")}>
 						Get Started

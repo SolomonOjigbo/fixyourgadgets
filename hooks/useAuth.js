@@ -31,6 +31,7 @@ export default function AuthProvider({ children }) {
 
 	useEffect(() => {
 		console.log(response);
+
 		if (response?.type === "success") {
 			setAuth(response.authentication);
 
@@ -122,18 +123,15 @@ export default function AuthProvider({ children }) {
 		await AsyncStorage.removeItem("auth");
 	};
 
-	const memoedValue = useMemo(
-		() => ({
-			user,
-			auth,
-			requireRefresh,
-			refreshToken,
-			getUserData,
-			logout,
-			promptAsync,
-		}),
-		[user, auth]
-	);
+	const memoedValue = useMemo(() => ({
+		user,
+		auth,
+		requireRefresh,
+		refreshToken,
+		getUserData,
+		logout,
+		promptAsync,
+	}));
 
 	return (
 		<AuthContext.Provider value={memoedValue}>{children}</AuthContext.Provider>

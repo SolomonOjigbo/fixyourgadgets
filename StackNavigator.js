@@ -9,6 +9,12 @@ import RequestScreen from "./screens/RequestScreen";
 import ScheduleService from "./screens/ScheduleService";
 import LoginScreen from "./screens/LoginScreen";
 import ThankyouScreen from "./screens/ThankyouScreen";
+import Phones from "./screens/phones/Phones";
+import Laptops from "./screens/laptops/Laptops";
+import Desktops from "./screens/desktops/Desktops";
+import Printers from "./screens/printers/Printers";
+import Electronics from "./screens/electronics/Electronics";
+import Accessories from "./screens/accessories/Accessories";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +34,12 @@ const StackNavigator = () => {
 					<Stack.Screen name="Schedule" component={ScheduleService} />
 					<Stack.Screen name="Request" component={RequestScreen} />
 					<Stack.Screen name="Thanks" component={ThankyouScreen} />
+					<Stack.Screen name="Phones" component={Phones} />
+					<Stack.Screen name="Laptops" component={Laptops} />
+					<Stack.Screen name="Desktops" component={Desktops} />
+					<Stack.Screen name="Printers" component={Printers} />
+					<Stack.Screen name="Electronics" component={Electronics} />
+					<Stack.Screen name="Accessories" component={Accessories} />
 				</>
 			) : (
 				<Stack.Screen name="Login" component={LoginScreen} />
